@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello World</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- <link href="main.css" rel="stylesheet" media="all"> -->
+        <style>
+          input {
+            box-sizing: border-box;
+          }
+          #app {
+            padding-left: 10px;
+          }
+        </style>
+    </head>
+    <body style="margin: 0">
+        <div style="display: flex">
+          <div><canvas id ="canv"/></div>
+          <div id="app" style = "width: 150px"></div>
+        </div>
+
+        <script src="elm.js"></script>
+        <script>
+            let appcontainer = document.getElementById('app')
+            let app = Elm.Ftack.embed(appcontainer)
+            let imageData = {}
+            let imageres = []
+            let ctx = {}
+            let cl = false
+            let x = 0
+            let y = 0
+            console.time("rendertime")
+
+            app.ports.sendData.subscribe((data) => {
+              let canvas = document.getElementById('canv')
+              ctx = canvas.getContext('2d')
+              canvas.width = data[0]
+              canvas.height = data[1]
+              imageres = [canvas.width, canvas.height]
+              imageData = ctx.createImageData(canvas.width, canvas.height)
+              for (i = 0; i < data[2].length; i++) {
+                imageData.data[i] = data[2][i]
+              }
+              ctx.putImageData(imageData, 0, 0)
+              console.timeEnd("rendertime")
+            })
+            // appcontainer.addEventListener('mouseover', () => {
+            //     let canvas = document.getElementById('canv')
+            //     let ctx = canvas.getContext('2d')
+            //     ctx.putImageData(imageData, 0, 0)
+            // })
+            // document.getElementById('canv').addEventListener("mousewheel", (e)=> {
+            //   // console.time("rendertime")
+            //   app.ports.getZoom.send(e.deltaY)
+            // }, false)
+
+            document.getElementById('canv').addEventListener("mousedown", (e)=> {
+              cl = true
+              x = e.clientX
+              y = e.clientY
+            }, false)
+            document.getElementById('canv').addEventListener("mouseup", (e)=> {
+              if (cl & e.clientX - x > 5) {
+                console.time("rendertime")
+                app.ports.getRect.send([x, y, e.clientX - x])
+                x = 0
+                y = 0
+              }
+              cl = false
+            }, false)
+            document.getElementById('canv').addEventListener("mousemove", (e)=> {
+              if (cl) {
+                ctx.clearRect(0, 0, imageres[0], imageres[0])
+                ctx.putImageData(imageData, 0, 0)
+                ctx.beginPath()
+                ctx.strokeStyle="white"
+                ctx.rect(x,y, e.clientX - x ,e.clientX - x)
+                ctx.stroke()
+
+                // console.log([e.clientX - x, e.clientY - y], [100*(e.clientX - x)/imageres[0], 100*(e.clientY - y)/imageres[1]])
+                // app.ports.getPan.send([e.clientX - x, e.clientY - y])
+                // x = e.clientX
+                // y = e.clientY
+              }
+            }, false)
+
+            // document.addEventListener("DOMContentLoaded", function(event) {
+            //   let canvas = document.getElementById('canv')
+            //   canvas.addEventListener("resize", (e) => {console.log(e)}, false);
+            //
+            //   // console.log("DOM fully loaded and parsed")
+            // })
+
+            // setInterval(()=>{
+            //     let canvas = document.getElementById('canv')
+            //     let ctx = canvas.getContext('2d')
+            //     ctx.putImageData(imageData, 0, 0)
+            //     console.log(imageData)
+            // }, 1000)
+
+
+            // var observer = new MutationObserver((mutations) => {
+            //   mutations.forEach((mutation) => {
+            //     let inp = document.getElementById('canv')
+            //     console.log(inp)
+            //     if (inp) {
+            //       console.log(inp)
+            //
+            //       for(var key in inp){
+            //           if(key.search('on') === 0) {
+            //              inp.addEventListener(key.slice(2), (e) => {
+            //                 console.log("**************observe" ,e)
+            //             })
+            //           }
+            //       }
+            //       // inp.addEventListener('resize', (e) => {
+            //       //   console.log("**************observe" ,e)
+            //       // })
+            //     }
+            //   })
+            // })
+            // var config = { attributes: true, childList: true, characterData: true }
+            // observer.observe(appcontainer, config)
+
+            // var target = document.getElementById('some-id')
+
+            // var observer = new MutationObserver(function(mutations) {
+            //   mutations.forEach(function(mutation) {
+            //     console.log(mutation.type)
+            //     let inp = document.getElementById('canv')
+            //
+            //     if (inp) {
+            //       inp.addEventListener('onLoad', (e) => {
+            //         console.log(e)
+            //       })
+            //     }
+            //   })
+            // })
+            //
+            // var config = { attributes: true, childList: true, characterData: true }
+            // observer.observe(appcontainer, config)
+        </script>
+    </body>
+</html>
