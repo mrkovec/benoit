@@ -23,7 +23,7 @@
         <script src="elm.js"></script>
         <script>
             let appcontainer = document.getElementById('app')
-            let app = Elm.Ftack.embed(appcontainer)
+            let app = Elm.Benoit.embed(appcontainer)
             let imageData = {}
             let imageres = []
             let ctx = {}
@@ -45,15 +45,6 @@
               ctx.putImageData(imageData, 0, 0)
               console.timeEnd("rendertime")
             })
-            // appcontainer.addEventListener('mouseover', () => {
-            //     let canvas = document.getElementById('canv')
-            //     let ctx = canvas.getContext('2d')
-            //     ctx.putImageData(imageData, 0, 0)
-            // })
-            // document.getElementById('canv').addEventListener("mousewheel", (e)=> {
-            //   // console.time("rendertime")
-            //   app.ports.getZoom.send(e.deltaY)
-            // }, false)
 
             document.getElementById('canv').addEventListener("mousedown", (e)=> {
               cl = true
@@ -77,69 +68,8 @@
                 ctx.strokeStyle="white"
                 ctx.rect(x,y, e.clientX - x ,e.clientX - x)
                 ctx.stroke()
-
-                // console.log([e.clientX - x, e.clientY - y], [100*(e.clientX - x)/imageres[0], 100*(e.clientY - y)/imageres[1]])
-                // app.ports.getPan.send([e.clientX - x, e.clientY - y])
-                // x = e.clientX
-                // y = e.clientY
               }
             }, false)
-
-            // document.addEventListener("DOMContentLoaded", function(event) {
-            //   let canvas = document.getElementById('canv')
-            //   canvas.addEventListener("resize", (e) => {console.log(e)}, false);
-            //
-            //   // console.log("DOM fully loaded and parsed")
-            // })
-
-            // setInterval(()=>{
-            //     let canvas = document.getElementById('canv')
-            //     let ctx = canvas.getContext('2d')
-            //     ctx.putImageData(imageData, 0, 0)
-            //     console.log(imageData)
-            // }, 1000)
-
-
-            // var observer = new MutationObserver((mutations) => {
-            //   mutations.forEach((mutation) => {
-            //     let inp = document.getElementById('canv')
-            //     console.log(inp)
-            //     if (inp) {
-            //       console.log(inp)
-            //
-            //       for(var key in inp){
-            //           if(key.search('on') === 0) {
-            //              inp.addEventListener(key.slice(2), (e) => {
-            //                 console.log("**************observe" ,e)
-            //             })
-            //           }
-            //       }
-            //       // inp.addEventListener('resize', (e) => {
-            //       //   console.log("**************observe" ,e)
-            //       // })
-            //     }
-            //   })
-            // })
-            // var config = { attributes: true, childList: true, characterData: true }
-            // observer.observe(appcontainer, config)
-
-            // var target = document.getElementById('some-id')
-
-            // var observer = new MutationObserver(function(mutations) {
-            //   mutations.forEach(function(mutation) {
-            //     console.log(mutation.type)
-            //     let inp = document.getElementById('canv')
-            //
-            //     if (inp) {
-            //       inp.addEventListener('onLoad', (e) => {
-            //         console.log(e)
-            //       })
-            //     }
-            //   })
-            // })
-            //
-            // var config = { attributes: true, childList: true, characterData: true }
-            // observer.observe(appcontainer, config)
         </script>
     </body>
 </html>
