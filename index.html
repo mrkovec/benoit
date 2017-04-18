@@ -23,17 +23,19 @@
         <script>
             let appcontainer = document.getElementById('app')
             let app = Elm.Benoit.embed(appcontainer)
+
+            let canvas = document.getElementById('canv')
+            let ctx = canvas.getContext('2d')
+            ctx.font = "20px Arial"
+            ctx.fillText("processing...",30,30)
+
             let imageData = {}
             let imageres = []
-            let ctx = {}
             let cl = false
             let x = 0
             let y = 0
-            console.time("rendertime")
 
             app.ports.sendData.subscribe((data) => {
-              let canvas = document.getElementById('canv')
-              ctx = canvas.getContext('2d')
               canvas.width = data[0]
               canvas.height = data[1]
               imageres = [canvas.width, canvas.height]
@@ -42,7 +44,6 @@
                 imageData.data[i] = data[2][i]
               }
               ctx.putImageData(imageData, 0, 0)
-              console.timeEnd("rendertime")
             })
 
             document.getElementById('canv').addEventListener("mousedown", (e)=> {
@@ -52,7 +53,6 @@
             }, false)
             document.getElementById('canv').addEventListener("mouseup", (e)=> {
               if (cl & e.clientX - x > 5) {
-                console.time("rendertime")
                 app.ports.getRect.send([x, y, e.clientX - x])
                 x = 0
                 y = 0
