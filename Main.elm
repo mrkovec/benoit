@@ -10,7 +10,6 @@ import Random exposing (..)
 import Ports exposing (..)
 import Json.Encode as EJson
 import ParseInt exposing (toHex, parseIntHex)
-import Debug exposing (log)
 import Time exposing (..)
 
 
