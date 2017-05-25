@@ -19,7 +19,7 @@ main =
     { init = init
      , view = view
      , update = update
-     , subscriptions = subs--\_ -> Sub.none
+     , subscriptions = subs
     }
 
 
@@ -47,6 +47,7 @@ type alias Cband =
 
 type alias Model =
     { cdepth : Int
+    , cres : Int
     , res : Int
     , p : CN
     , u : Float
@@ -61,7 +62,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init  =
-  Model 50 10 (CN -2.5 2) 4.0 -4.0 1 (Array.fromList [(Cband (C 1 1 1) 0), (Cband (C 0 0 1) 0.25), (Cband (C 1 0 0) 0.5), (Cband (C 1 1 0) 0.75), (Cband (C 0 0 0) 1)]) [[0]] { act = True, g = 2.2 } { comp = -1, paint = -1, proc = -1 }
+  Model 50 400 10 (CN -2.5 2) 4.0 -4.0 1 (Array.fromList [(Cband (C 1 1 1) 0), (Cband (C 0 0 1) 0.25), (Cband (C 1 0 0) 0.5), (Cband (C 1 1 0) 0.75), (Cband (C 0 0 0) 1)]) [[0]] { act = True, g = 2.2 } { comp = -1, paint = -1, proc = -1 }
     ! [ Task.perform Res Window.size ]
 
 
@@ -75,6 +76,7 @@ type Msg
         | Rect (Int, Int, Int)
         | ChangeDepth String
         | ChangeOsampl String
+        | ChangeRes String
         | ChangeGrad String Int String
         | SwitchGamma Bool
         | ChangeGamma String
@@ -116,7 +118,7 @@ update msg model =
 
         Rect (ax,ay, bx) ->
           let
-            ores = 1.0 / toFloat model.res
+            ores = 1.0 / toFloat (if model.cres == -1 then model.res else model.cres)
             p_ar = ores * toFloat ax
             p_ai = ores * toFloat ay
             uv_a = ores *  (toFloat bx)
@@ -134,6 +136,14 @@ update msg model =
           in
           { model | cdepth = nd, renderPar = { rp | comp = 0} }
             ! []
+
+        ChangeRes d ->
+          let
+            nd = Result.withDefault -1 (String.toInt d)
+            rp = model.renderPar
+          in
+            { model | cres = nd, renderPar = { rp | comp = 0} }
+              ! []
 
         ChangeOsampl o ->
           let
@@ -215,7 +225,16 @@ view : Model -> Html Msg
 view model =
   section []
     [ p []
-      [ label [ for "depth" ] [text "maximum number of iterations"]
+    [ label [ for "res" ] [text "resolution"]
+      , input
+        [ id "res"
+        , type_ "number"
+        , property "min" (EJson.int 1)
+        , property "step" (EJson.int 100)
+         , placeholder <| "default: " ++ (if model.cres == -1 then "automatic" else toString model.cres)
+         , onInput ChangeRes
+        ] []
+      , label [ for "depth" ] [text "maximum number of iterations"]
       , input
           [ id "depth"
           , type_ "number"
@@ -308,7 +327,8 @@ eval z c d i =
 compute : Model -> Model
 compute m =
   let
-    t = 1.0 / toFloat m.res
+    res = (if m.cres == -1 then m.res else m.cres)
+    t = 1.0 / toFloat res
     cc = List.concat <| List.indexedMap (\y a ->
       List.indexedMap (\x b ->
         List.map (\rnd ->
@@ -323,7 +343,7 @@ compute m =
           i
         ) b
       ) a
-    ) (List.repeat m.res (List.repeat m.res (List.range 1 m.cosampl)))
+    ) (List.repeat res (List.repeat res (List.range 1 m.cosampl)))
   in
   { m | comp = cc }
 
@@ -376,7 +396,7 @@ paint m =
       [ gamma m c.r, gamma m c.g, gamma m c.b, 255]
     ) data
   in
-  Ports.sendData (m.res, m.res, x)
+  Ports.sendData ((if m.cres == -1 then m.res else m.cres), (if m.cres == -1 then m.res else m.cres), x)
 
 
 hexToCol : String -> C
